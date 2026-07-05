@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7f4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="生活観測">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>生活観測</title>
   <style>
     :root {
@@ -985,10 +989,12 @@
 
       <div class="card form-block">
         <h2 class="section-title">データ管理</h2>
-        <p class="data-note">records、dailyReviews、settings、accounts、moneyRecordsをまとめてJSONで保存します。</p>
-        <button class="primary-btn" id="exportJson">JSONをエクスポート</button>
+        <p class="data-note">このアプリの記録データは、この端末・このブラウザ内に保存されます。GitHubには保存されません。機種変更、ブラウザ削除、履歴削除に備えて、定期的にJSONバックアップしてください。</p>
+        <p class="data-note">初回はまず「お金」画面で現金・銀行・電子マネー・クレカ利用額を登録します。クレカ利用額はクレカ口座として登録し、月予算を設定します。以後はホーム画面からクイック記録します。</p>
+        <p class="data-note">records、dailyReviews、settings、accounts、moneyRecordsをまとめて保存・復元します。</p>
+        <button class="primary-btn" id="exportJson">バックアップJSONを保存</button>
         <input id="importJsonFile" type="file" accept="application/json,.json">
-        <button class="secondary-btn" id="importJson">JSONをインポートして置き換え</button>
+        <button class="secondary-btn" id="importJson">バックアップJSONから復元</button>
       </div>
     </section>
 
