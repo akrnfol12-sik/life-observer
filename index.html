@@ -1,0 +1,2506 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>生活観測</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f4;
+      --surface: #ffffff;
+      --surface-strong: #f0f3ef;
+      --ink: #303833;
+      --muted: #747d78;
+      --line: #e1e5df;
+      --escape: #9d5a52;
+      --build: #4f7f68;
+      --money: #8a7649;
+      --mind: #6b7098;
+      --shadow: 0 8px 20px rgba(31, 42, 36, 0.06);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.9), rgba(246,247,244,0.98) 240px),
+        var(--bg);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: min(100%, 520px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 14px 104px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-pill {
+      min-width: 98px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 850;
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .status-pill.observed {
+      background: var(--build);
+    }
+
+    .status-pill.unobserved {
+      background: #737b76;
+    }
+
+    .view {
+      display: none;
+      animation: fadeIn 0.16s ease-out;
+    }
+
+    .view.active {
+      display: grid;
+      gap: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 850;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .section-head .section-title {
+      margin: 0;
+    }
+
+    .hero-state,
+    .form-block {
+      display: grid;
+      gap: 12px;
+    }
+
+    .state-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .state-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .state-value {
+      font-size: 16px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .asset-total {
+      display: grid;
+      gap: 5px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #eef3ed;
+      border: 1px solid #dbe3dc;
+      color: var(--ink);
+    }
+
+    .asset-total span {
+      font-size: 12px;
+      font-weight: 850;
+      color: var(--muted);
+    }
+
+    .asset-total strong {
+      font-size: clamp(28px, 10vw, 42px);
+      line-height: 1;
+      font-weight: 900;
+      word-break: keep-all;
+    }
+
+    .metric-grid,
+    .money-grid,
+    .observe-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric,
+    .observe-item {
+      min-height: 74px;
+      display: grid;
+      gap: 6px;
+      align-content: center;
+      padding: 10px;
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      border-left: 4px solid #a9b0aa;
+    }
+
+    .metric.escape { border-left-color: var(--escape); }
+    .metric.build { border-left-color: var(--build); }
+    .metric.money { border-left-color: var(--money); }
+    .metric.mind { border-left-color: var(--mind); }
+
+    .metric span,
+    .observe-item span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .metric strong,
+    .observe-item strong {
+      font-size: clamp(17px, 5.8vw, 24px);
+      line-height: 1.05;
+      font-weight: 900;
+      word-break: keep-all;
+    }
+
+    .observe-item {
+      border-left-color: var(--build);
+    }
+
+    .plus-message {
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #eaf5ef;
+      color: #23533f;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .warning {
+      display: none;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #fff5dc;
+      border: 1px solid #ecd08b;
+      color: #664d16;
+      font-size: 13px;
+      font-weight: 850;
+      text-align: left;
+    }
+
+    .warning.show {
+      display: block;
+    }
+
+    .quick-grid,
+    .category-grid,
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .quick-section,
+    .category-section {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .quick-section:first-of-type,
+    .category-section:first-of-type {
+      margin-top: 0;
+    }
+
+    .sub-title {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .sub-note {
+      margin: -4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .big-action,
+    .category-btn,
+    .chip,
+    .nav-btn,
+    .primary-btn,
+    .secondary-btn,
+    .delete-btn,
+    .edit-btn,
+    .small-btn {
+      border-radius: var(--radius);
+      min-height: 48px;
+      font-weight: 850;
+    }
+
+    .big-action,
+    .template-btn {
+      display: grid;
+      gap: 3px;
+      align-content: center;
+      padding: 12px 10px;
+      color: #fff;
+      text-align: left;
+      border-radius: var(--radius);
+      min-height: 70px;
+      font-weight: 850;
+    }
+
+    .big-action small,
+    .template-btn small {
+      opacity: 0.86;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .big-action.escape { background: var(--escape); }
+    .big-action.build { background: var(--build); }
+    .big-action.money,
+    .template-btn { background: var(--money); }
+    .big-action.mind { background: var(--mind); }
+    .big-action.health { background: #667570; }
+
+    .category-btn {
+      min-height: 70px;
+      padding: 10px;
+      color: var(--ink);
+      background: var(--surface-strong);
+      border: 2px solid transparent;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .category-btn.selected {
+      background: #fff;
+      border-color: var(--ink);
+      box-shadow: inset 0 0 0 2px #fff;
+    }
+
+    .category-btn[data-group="escape"].selected { border-color: var(--escape); }
+    .category-btn[data-group="build"].selected { border-color: var(--build); }
+    .category-btn[data-group="money"].selected { border-color: var(--money); }
+    .category-btn[data-group="mind"].selected,
+    .category-btn[data-group="health"].selected { border-color: var(--mind); }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      min-width: 68px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .chip.selected {
+      color: #fff;
+      background: #59645e;
+      border-color: #59645e;
+    }
+
+    .money-input,
+    .text-input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 10px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .money-input {
+      min-height: 48px;
+      font-size: 18px;
+      font-weight: 850;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 76px;
+    }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 58px;
+      color: #fff;
+      background: #46534c;
+      font-size: 16px;
+    }
+
+    .secondary-btn,
+    .small-btn {
+      min-height: 48px;
+      padding: 0 14px;
+      color: var(--ink);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    .small-btn {
+      min-height: 40px;
+      font-size: 12px;
+    }
+
+    .review-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .summary-item {
+      min-height: 72px;
+      display: grid;
+      align-content: center;
+      gap: 5px;
+      padding: 9px;
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      text-align: center;
+    }
+
+    .summary-item span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .summary-item strong {
+      font-size: 16px;
+      font-weight: 900;
+      word-break: keep-all;
+    }
+
+    .record-list,
+    .account-list,
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .record-item,
+    .account-item,
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .history-item {
+      grid-template-columns: 1fr;
+    }
+
+    .record-main,
+    .account-main {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .record-title,
+    .account-title,
+    .history-title {
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .record-meta,
+    .account-meta,
+    .history-meta {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+    }
+
+    .record-actions {
+      display: grid;
+      gap: 6px;
+    }
+
+    .delete-btn,
+    .edit-btn {
+      min-width: 44px;
+      min-height: 40px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .delete-btn {
+      color: #7e463f;
+      background: #f8e9e5;
+    }
+
+    .edit-btn {
+      color: #375d4c;
+      background: #eaf3ed;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 10px 0 2px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .inline-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .check-row input {
+      width: 20px;
+      height: 20px;
+    }
+
+    .editor-panel {
+      position: fixed;
+      left: 50%;
+      bottom: 86px;
+      width: min(calc(100% - 28px), 492px);
+      max-height: calc(100vh - 120px);
+      transform: translateX(-50%);
+      overflow: auto;
+      z-index: 40;
+      display: none;
+      gap: 10px;
+    }
+
+    .editor-panel.show {
+      display: grid;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      width: min(100%, 520px);
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+      background: rgba(250, 251, 248, 0.94);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      z-index: 20;
+    }
+
+    .nav-btn {
+      display: grid;
+      place-items: center;
+      min-height: 46px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 11px;
+    }
+
+    .nav-btn.active {
+      color: #fff;
+      background: #59645e;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 86px;
+      width: min(calc(100% - 28px), 492px);
+      transform: translate(-50%, 18px);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 13px;
+      border-radius: var(--radius);
+      background: #46534c;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 850;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 50;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+
+    .toast button {
+      min-height: 36px;
+      padding: 0 10px;
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .data-note {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 360px) {
+      .app {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .metric-grid,
+      .money-grid,
+      .observe-grid,
+      .quick-grid,
+      .category-grid,
+      .template-grid,
+      .inline-grid,
+      .review-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .brand h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1>生活観測</h1>
+        <div class="date" id="todayLabel"></div>
+      </div>
+      <div class="status-pill unobserved" id="observePill">未観測</div>
+    </header>
+
+    <section class="view active" id="homeView" aria-label="ホーム">
+      <div class="card hero-state">
+        <div class="asset-total">
+          <span>現在の総資産</span>
+          <strong id="homeNetWorth">0円</strong>
+          <span id="homeLastBalance">最終残高更新: 未設定</span>
+        </div>
+        <div class="money-grid">
+          <div class="metric money">
+            <span>今月の支出</span>
+            <strong id="homeMonthExpense">0円</strong>
+          </div>
+          <div class="metric money">
+            <span>今日の支出</span>
+            <strong id="homeExpense">0円</strong>
+          </div>
+          <div class="metric money">
+            <span>月予算の残額</span>
+            <strong id="homeBudgetLeft">未設定</strong>
+          </div>
+          <div class="metric mind">
+            <span>精神状態</span>
+            <strong id="homeMind">未観測</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hero-state">
+        <div class="state-line">
+          <div>
+            <div class="state-label">今日の観測状態</div>
+            <div class="state-value" id="stateText">未観測</div>
+          </div>
+          <button class="secondary-btn" data-go="quick">記録する</button>
+        </div>
+        <div class="metric-grid">
+          <div class="metric escape">
+            <span>逃避時間</span>
+            <strong id="homeEscape">0分</strong>
+          </div>
+          <div class="metric build">
+            <span>積み上げ時間</span>
+            <strong id="homeBuild">0分</strong>
+          </div>
+        </div>
+        <button class="warning" id="reviewWarning" data-go="review">30秒だけ今日を確定する。今日を責めずに閉じる。</button>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">クイック記録</h2>
+        <div class="quick-section">
+          <h3 class="sub-title">逃避</h3>
+          <div class="quick-grid">
+            <button class="big-action escape" data-fast="sns"><span>SNS</span><small>15分 観測</small></button>
+            <button class="big-action escape" data-fast="av"><span>AV</span><small>15分 観測</small></button>
+            <button class="big-action escape" data-fast="game"><span>ゲーム</span><small>30分 観測</small></button>
+          </div>
+        </div>
+        <div class="quick-section">
+          <h3 class="sub-title">積み上げ</h3>
+          <div class="quick-grid">
+            <button class="big-action build" data-fast="reading"><span>読書</span><small>15分 積む</small></button>
+            <button class="big-action build" data-fast="testStudy"><span>テスト勉強</span><small>15分 積む</small></button>
+            <button class="big-action build" data-fast="festival"><span>学祭</span><small>15分 積む</small></button>
+          </div>
+        </div>
+        <div class="quick-section">
+          <h3 class="sub-title">お金</h3>
+          <div class="quick-grid">
+            <button class="big-action money" data-fast="expense"><span>支出</span><small>500円 観測</small></button>
+          </div>
+        </div>
+        <div class="quick-section">
+          <h3 class="sub-title">メンタル</h3>
+          <div class="quick-grid">
+            <button class="big-action mind" data-fast="shinoAnxiety"><span>詩乃不安</span><small>反応を観測</small></button>
+            <button class="big-action health" data-fast="badHealth"><span>体調悪い</span><small>状態を観測</small></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">観測評価</h2>
+        <div class="observe-grid">
+          <div class="observe-item">
+            <span>今日の観測件数</span>
+            <strong id="observeCount">0件</strong>
+          </div>
+          <div class="observe-item">
+            <span>未観測回避</span>
+            <strong id="unobservedAvoided">まだ</strong>
+          </div>
+          <div class="observe-item">
+            <span>逃避の扱い</span>
+            <strong id="escapeObserved">未観測</strong>
+          </div>
+          <div class="observe-item">
+            <span>今日のプラス</span>
+            <strong id="todayPlusShort">記録待ち</strong>
+          </div>
+        </div>
+        <div class="plus-message" id="todayPlusMessage">未記録は失敗ではなく未観測です。1件だけでも見えれば前進です。</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">今日の記録</h2>
+        <div class="record-list" id="todayRecords"></div>
+      </div>
+    </section>
+
+    <section class="view" id="quickView" aria-label="クイック記録">
+      <div class="card">
+        <h2 class="section-title">何を記録する？</h2>
+        <div id="categorySections"></div>
+      </div>
+
+      <div class="card form-block">
+        <h2 class="section-title" id="quickTitle">SNSを記録</h2>
+        <div class="field" id="amountField">
+          <label id="amountLabel">時間</label>
+          <div class="chip-row" id="amountChips"></div>
+          <input class="money-input" id="amountInput" inputmode="numeric" type="number" min="0" step="1" value="15">
+        </div>
+
+        <div class="field">
+          <label>理由</label>
+          <div class="chip-row" id="reasonChips"></div>
+        </div>
+
+        <div class="field">
+          <label>気分</label>
+          <div class="chip-row" id="moodChips"></div>
+        </div>
+
+        <div class="field" id="expenseExtraBlock">
+          <label>支出の意味</label>
+          <div class="chip-row" id="quickMeaningChips"></div>
+          <label>未来の自分への意味</label>
+          <div class="chip-row" id="quickFutureChips"></div>
+        </div>
+
+        <div class="field" id="shinoDetailBlock">
+          <label>詩乃に反応した自分を観測する</label>
+          <textarea id="shinoFact" maxlength="160" placeholder="実際に起きたこと"></textarea>
+          <textarea id="shinoInterpretation" maxlength="160" placeholder="自分がそう解釈したこと"></textarea>
+          <textarea id="shinoReaction" maxlength="160" placeholder="自分の反応"></textarea>
+        </div>
+
+        <div class="field">
+          <label>一言</label>
+          <input class="text-input" id="noteInput" maxlength="80" placeholder="任意">
+        </div>
+
+        <button class="primary-btn" id="saveQuick">保存</button>
+      </div>
+    </section>
+
+    <section class="view" id="moneyView" aria-label="お金">
+      <div class="card hero-state">
+        <div class="asset-total">
+          <span>現在の総資産</span>
+          <strong id="moneyNetWorth">0円</strong>
+          <span id="moneyLastBalance">最終残高更新: 未設定</span>
+        </div>
+        <div class="money-grid">
+          <div class="metric money">
+            <span>今月の支出</span>
+            <strong id="moneyMonthExpense">0円</strong>
+          </div>
+          <div class="metric money">
+            <span>月予算の残額</span>
+            <strong id="moneyBudgetLeft">未設定</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card form-block">
+        <h2 class="section-title">月予算</h2>
+        <div class="field">
+          <label>今月の支出予算</label>
+          <input class="money-input" id="monthlyBudgetInput" inputmode="numeric" type="number" min="0" step="1" value="0">
+        </div>
+        <button class="primary-btn" id="saveMonthlyBudget">月予算を保存</button>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <h2 class="section-title">資産一覧</h2>
+          <button class="small-btn" id="newAccountBtn">新規</button>
+        </div>
+        <div class="account-list" id="accountList"></div>
+      </div>
+
+      <div class="card form-block">
+        <h2 class="section-title" id="accountFormTitle">口座を編集</h2>
+        <input type="hidden" id="accountEditId">
+        <div class="inline-grid">
+          <div class="field">
+            <label>口座名</label>
+            <input class="text-input" id="accountName" maxlength="30" placeholder="現金">
+          </div>
+          <div class="field">
+            <label>種類</label>
+            <select id="accountType">
+              <option value="cash">cash</option>
+              <option value="bank">bank</option>
+              <option value="emoney">emoney</option>
+              <option value="credit">credit</option>
+              <option value="other">other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>残高</label>
+          <input class="money-input" id="accountBalance" inputmode="numeric" type="number" step="1" value="0">
+        </div>
+        <label class="check-row">
+          <input type="checkbox" id="accountIsDebt">
+          負債として総資産から差し引く
+        </label>
+        <button class="primary-btn" id="saveAccount">口座を保存</button>
+      </div>
+
+      <div class="card form-block">
+        <h2 class="section-title" id="moneyFormTitle">お金の動きを記録</h2>
+        <input type="hidden" id="moneyEditId">
+        <div class="field">
+          <label>種類</label>
+          <div class="chip-row" id="moneyTypeChips"></div>
+        </div>
+        <div class="field">
+          <label>金額</label>
+          <input class="money-input" id="moneyAmount" inputmode="numeric" type="number" min="0" step="1" value="0">
+        </div>
+        <div class="inline-grid">
+          <div class="field">
+            <label id="fromAccountLabel">支払い元口座</label>
+            <select id="moneyAccount"></select>
+          </div>
+          <div class="field" id="toAccountField">
+            <label id="toAccountLabel">振替先口座</label>
+            <select id="moneyToAccount"></select>
+          </div>
+        </div>
+        <div class="field" id="moneyCategoryField">
+          <label>カテゴリ</label>
+          <input class="text-input" id="moneyCategory" maxlength="30" placeholder="食費">
+        </div>
+        <div class="field">
+          <label>支出の意味</label>
+          <div class="chip-row" id="moneyMeaningChips"></div>
+        </div>
+        <div class="field">
+          <label>未来の自分への意味</label>
+          <div class="chip-row" id="moneyFutureChips"></div>
+        </div>
+        <div class="field">
+          <label>メモ</label>
+          <input class="text-input" id="moneyNote" maxlength="80" placeholder="任意">
+        </div>
+        <button class="primary-btn" id="saveMoneyRecord">お金の動きを保存</button>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">よく使う支出</h2>
+        <div class="template-grid" id="moneyTemplates"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">今月の記録</h2>
+        <div class="record-list" id="monthMoneyRecords"></div>
+      </div>
+    </section>
+
+    <section class="view" id="historyView" aria-label="履歴">
+      <div class="card">
+        <h2 class="section-title">過去7日間</h2>
+        <div class="history-list" id="historyList"></div>
+      </div>
+
+      <div class="card form-block">
+        <h2 class="section-title">データ管理</h2>
+        <p class="data-note">records、dailyReviews、settings、accounts、moneyRecordsをまとめてJSONで保存します。</p>
+        <button class="primary-btn" id="exportJson">JSONをエクスポート</button>
+        <input id="importJsonFile" type="file" accept="application/json,.json">
+        <button class="secondary-btn" id="importJson">JSONをインポートして置き換え</button>
+      </div>
+    </section>
+
+    <section class="view" id="reviewView" aria-label="夜レビュー">
+      <div class="card">
+        <h2 class="section-title">今日のまとめ</h2>
+        <div class="review-summary">
+          <div class="summary-item">
+            <span>逃避</span>
+            <strong id="reviewEscape">0分</strong>
+          </div>
+          <div class="summary-item">
+            <span>積み上げ</span>
+            <strong id="reviewBuild">0分</strong>
+          </div>
+          <div class="summary-item">
+            <span>支出</span>
+            <strong id="reviewExpense">0円</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card form-block">
+        <h2 class="section-title">夜レビュー</h2>
+
+        <div class="field">
+          <label>今日の精神状態</label>
+          <div class="chip-row" id="reviewMindChips"></div>
+        </div>
+
+        <div class="field">
+          <label>今日の逃避原因</label>
+          <div class="chip-row" id="causeChips"></div>
+        </div>
+
+        <div class="field">
+          <label>今日できたこと</label>
+          <div class="chip-row" id="winChips"></div>
+        </div>
+
+        <div class="field">
+          <label>明日1つだけ直すこと</label>
+          <div class="chip-row" id="fixChips"></div>
+        </div>
+
+        <div class="field">
+          <label>メモ</label>
+          <textarea id="reviewNote" maxlength="240" placeholder="任意"></textarea>
+        </div>
+
+        <button class="primary-btn" id="saveReview">夜レビューを保存</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="card editor-panel" id="recordEditor">
+    <h2 class="section-title" id="recordEditTitle">記録を修正</h2>
+    <div class="field" id="recordEditAmountField">
+      <label id="recordEditAmountLabel">時間</label>
+      <input class="money-input" id="recordEditAmount" inputmode="numeric" type="number" min="0" step="1">
+    </div>
+    <div class="field">
+      <label>理由</label>
+      <input class="text-input" id="recordEditReason" maxlength="40">
+    </div>
+    <div class="field">
+      <label>気分</label>
+      <input class="text-input" id="recordEditMood" maxlength="40">
+    </div>
+    <div class="field" id="recordEditShinoBlock">
+      <label>詩乃に反応した自分を観測する</label>
+      <textarea id="recordEditShinoFact" maxlength="160" placeholder="実際に起きたこと"></textarea>
+      <textarea id="recordEditShinoInterpretation" maxlength="160" placeholder="自分がそう解釈したこと"></textarea>
+      <textarea id="recordEditShinoReaction" maxlength="160" placeholder="自分の反応"></textarea>
+    </div>
+    <div class="field">
+      <label>メモ</label>
+      <input class="text-input" id="recordEditNote" maxlength="100">
+    </div>
+    <div class="inline-grid">
+      <button class="secondary-btn" id="cancelRecordEdit">閉じる</button>
+      <button class="primary-btn" id="saveRecordEdit">修正を保存</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="画面切り替え">
+    <button class="nav-btn active" data-view="home">ホーム</button>
+    <button class="nav-btn" data-view="quick">記録</button>
+    <button class="nav-btn" data-view="money">お金</button>
+    <button class="nav-btn" data-view="history">履歴</button>
+    <button class="nav-btn" data-view="review">夜</button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span id="toastText"></span>
+    <button id="toastAction" type="button"></button>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      records: "lifeObserver.records",
+      dailyReviews: "lifeObserver.dailyReviews",
+      settings: "lifeObserver.settings",
+      accounts: "lifeObserver.accounts",
+      moneyRecords: "lifeObserver.moneyRecords"
+    };
+
+    const CATEGORY_DEFS = {
+      sns: { label: "SNS", group: "escape", kind: "duration", defaultValue: 15, contextTag: "逃避" },
+      av: { label: "AV", group: "escape", kind: "duration", defaultValue: 15, contextTag: "逃避" },
+      game: { label: "ゲーム", group: "escape", kind: "duration", defaultValue: 30, contextTag: "逃避" },
+      youtube: { label: "YouTube / 動画", group: "escape", kind: "duration", defaultValue: 15, contextTag: "逃避" },
+      webWandering: { label: "無意味な検索", group: "escape", kind: "duration", defaultValue: 15, contextTag: "逃避" },
+      sleepEscape: { label: "寝逃げ", group: "escape", kind: "duration", defaultValue: 30, contextTag: "健康" },
+      reading: { label: "読書", group: "build", kind: "duration", defaultValue: 15, contextTag: "読書" },
+      study: { label: "資格勉強", group: "build", kind: "duration", defaultValue: 15, contextTag: "勉強" },
+      testStudy: { label: "テスト勉強", group: "build", kind: "duration", defaultValue: 15, contextTag: "大学" },
+      universityTask: { label: "大学課題", group: "build", kind: "duration", defaultValue: 15, contextTag: "大学" },
+      festival: { label: "学祭", group: "build", kind: "duration", defaultValue: 15, contextTag: "学祭" },
+      internship: { label: "インターン", group: "build", kind: "duration", defaultValue: 15, contextTag: "インターン" },
+      jobHunt: { label: "就活", group: "build", kind: "duration", defaultValue: 15, contextTag: "就活" },
+      exercise: { label: "運動 / 散歩", group: "build", kind: "duration", defaultValue: 15, contextTag: "健康" },
+      expense: { label: "支出", group: "money", kind: "money", defaultValue: 500, moneyType: "expense", contextTag: "お金" },
+      incomeRecord: { label: "収入", group: "money", kind: "money", defaultValue: 1000, moneyType: "income", contextTag: "お金" },
+      transferRecord: { label: "振替", group: "money", kind: "money", defaultValue: 1000, moneyType: "transfer", contextTag: "お金" },
+      creditExpense: { label: "クレカ利用", group: "money", kind: "money", defaultValue: 1000, moneyType: "creditExpense", contextTag: "お金" },
+      creditPayment: { label: "クレカ返済", group: "money", kind: "money", defaultValue: 1000, moneyType: "creditPayment", contextTag: "お金" },
+      shinoAnxiety: { label: "詩乃不安", group: "mind", kind: "state", defaultValue: 0, contextTag: "詩乃" },
+      badHealth: { label: "体調悪い", group: "health", kind: "state", defaultValue: 0, contextTag: "健康" },
+      fatigue: { label: "疲労", group: "health", kind: "state", defaultValue: 0, contextTag: "健康" },
+      anxiety: { label: "不安", group: "mind", kind: "state", defaultValue: 0, contextTag: "健康" },
+      sleepiness: { label: "眠気", group: "health", kind: "state", defaultValue: 0, contextTag: "健康" },
+      selfDisgust: { label: "自己嫌悪", group: "mind", kind: "state", defaultValue: 0, contextTag: "健康" },
+      recovery: { label: "回復", group: "mind", kind: "state", defaultValue: 0, contextTag: "健康" }
+    };
+
+    const CATEGORY_SECTIONS = [
+      {
+        title: "逃避を観測",
+        note: "責めずに見る",
+        keys: ["sns", "av", "game", "youtube", "webWandering", "sleepEscape"]
+      },
+      {
+        title: "積み上げを記録",
+        note: "できた分だけ積む",
+        keys: ["reading", "study", "testStudy", "universityTask", "festival", "internship", "jobHunt", "exercise"]
+      },
+      {
+        title: "お金を記録",
+        note: "お金の動きを見える化",
+        keys: ["expense", "incomeRecord", "transferRecord", "creditExpense", "creditPayment"]
+      },
+      {
+        title: "メンタル・体調",
+        note: "反応と状態を観測",
+        keys: ["shinoAnxiety", "badHealth", "fatigue", "anxiety", "sleepiness", "selfDisgust", "recovery"]
+      }
+    ];
+
+    const CHIPS = {
+      duration: [5, 15, 30, 60, 90],
+      money: [300, 500, 1000, 3000, 5000],
+      reason: {
+        escape: ["疲れ", "不安", "暇", "先延ばし", "寝る前", "習慣"],
+        build: ["予定通り", "少しだけ", "代替行動", "朝", "移動中", "回復"],
+        money: ["食費", "交通", "必要", "衝動買い", "固定費", "交際"],
+        mind: ["詩乃不安", "睡眠不足", "対人", "仕事", "孤独", "波"],
+        health: ["体調悪い", "睡眠不足", "頭痛", "疲労", "腹痛", "休息"]
+      },
+      moods: ["安定", "不安", "疲れ", "落ち込み", "少し回復"],
+      reviewMind: ["安定", "不安", "低調", "回復", "体調悪い"],
+      causes: ["疲れ", "不安", "暇", "先延ばし", "寝る前", "孤独", "刺激不足"],
+      wins: ["記録した", "読めた", "勉強した", "支出を見た", "休めた", "やめられた"],
+      fixes: ["寝る前スマホを置く", "最初に本を開く", "ゲーム前にタイマー", "支出を見てから買う", "体調優先"],
+      moneyTypes: ["支出", "収入", "振替", "クレカ利用", "クレカ返済"],
+      meanings: ["必要", "投資", "交際", "逃避", "衝動買い", "固定費", "その他"],
+      futureValues: ["未来の自分を強くした", "今を保つために必要", "逃避だったが観測できた", "微妙"]
+    };
+
+    const MONEY_TYPE_MAP = {
+      支出: "expense",
+      収入: "income",
+      振替: "transfer",
+      クレカ利用: "creditExpense",
+      クレカ返済: "creditPayment"
+    };
+
+    const MONEY_TYPE_LABELS = {
+      expense: "支出",
+      income: "収入",
+      transfer: "振替",
+      creditExpense: "クレカ利用",
+      creditPayment: "クレカ返済"
+    };
+
+    const ACCOUNT_TYPE_LABELS = {
+      cash: "現金",
+      bank: "銀行",
+      emoney: "電子マネー",
+      credit: "クレカ",
+      other: "その他"
+    };
+
+    let records = loadArray(STORAGE_KEYS.records);
+    let dailyReviews = loadObject(STORAGE_KEYS.dailyReviews);
+    let settings = loadSettings();
+    let accounts = loadArray(STORAGE_KEYS.accounts);
+    let moneyRecords = loadArray(STORAGE_KEYS.moneyRecords);
+    let selectedCategory = "sns";
+    let selectedReason = "疲れ";
+    let selectedMood = "安定";
+    let selectedQuickMeaning = "必要";
+    let selectedQuickFuture = "今を保つために必要";
+    let selectedMoneyType = "expense";
+    let selectedMoneyMeaning = "必要";
+    let selectedMoneyFuture = "今を保つために必要";
+    let editingRecordId = "";
+    let reviewState = {
+      mentalState: "安定",
+      escapeCauses: [],
+      wins: [],
+      tomorrowFix: "寝る前スマホを置く"
+    };
+
+    const els = {};
+
+    document.addEventListener("DOMContentLoaded", () => {
+      cacheElements();
+      ensureSettings();
+      ensureDefaultAccount();
+      buildCategoryButtons();
+      buildQuickForm(selectedCategory);
+      buildMoneyChoiceControls();
+      bindEvents();
+      resetAccountForm();
+      resetMoneyForm();
+      renderAll();
+    });
+
+    function cacheElements() {
+      [
+        "todayLabel", "observePill", "stateText", "homeNetWorth", "homeLastBalance",
+        "homeMonthExpense", "homeBudgetLeft", "homeEscape", "homeBuild", "homeExpense",
+        "homeMind", "observeCount", "unobservedAvoided", "escapeObserved",
+        "todayPlusShort", "todayPlusMessage", "reviewWarning", "todayRecords",
+        "categorySections", "quickTitle", "amountField", "amountLabel", "amountChips",
+        "amountInput", "reasonChips", "moodChips", "expenseExtraBlock",
+        "quickMeaningChips", "quickFutureChips", "shinoDetailBlock", "shinoFact",
+        "shinoInterpretation", "shinoReaction", "noteInput", "saveQuick",
+        "moneyNetWorth", "moneyLastBalance", "moneyMonthExpense", "moneyBudgetLeft",
+        "monthlyBudgetInput", "saveMonthlyBudget", "newAccountBtn", "accountList", "accountFormTitle", "accountEditId",
+        "accountName", "accountType", "accountBalance", "accountIsDebt",
+        "saveAccount", "moneyFormTitle", "moneyEditId", "moneyTypeChips",
+        "moneyAmount", "fromAccountLabel", "moneyAccount", "toAccountField", "toAccountLabel",
+        "moneyToAccount", "moneyCategoryField", "moneyCategory", "moneyMeaningChips", "moneyFutureChips",
+        "moneyNote", "saveMoneyRecord", "moneyTemplates", "monthMoneyRecords",
+        "historyList", "exportJson", "importJsonFile", "importJson",
+        "reviewEscape", "reviewBuild", "reviewExpense", "reviewMindChips",
+        "causeChips", "winChips", "fixChips", "reviewNote", "saveReview",
+        "recordEditor", "recordEditTitle", "recordEditAmountField",
+        "recordEditAmountLabel", "recordEditAmount", "recordEditReason",
+        "recordEditMood", "recordEditShinoBlock", "recordEditShinoFact",
+        "recordEditShinoInterpretation", "recordEditShinoReaction",
+        "recordEditNote", "cancelRecordEdit", "saveRecordEdit", "toast",
+        "toastText", "toastAction"
+      ].forEach((id) => {
+        els[id] = document.getElementById(id);
+      });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("[data-view]").forEach((button) => {
+        button.addEventListener("click", () => showView(button.dataset.view));
+      });
+
+      document.querySelectorAll("[data-go]").forEach((button) => {
+        button.addEventListener("click", () => showView(button.dataset.go));
+      });
+
+      document.querySelectorAll("[data-fast]").forEach((button) => {
+        button.addEventListener("click", () => saveFastRecord(button.dataset.fast));
+      });
+
+      els.saveQuick.addEventListener("click", saveQuickRecord);
+      els.saveReview.addEventListener("click", saveDailyReview);
+      els.saveMonthlyBudget.addEventListener("click", saveMonthlyBudget);
+      els.newAccountBtn.addEventListener("click", resetAccountForm);
+      els.accountType.addEventListener("change", () => {
+        if (els.accountType.value === "credit") els.accountIsDebt.checked = true;
+      });
+      els.saveAccount.addEventListener("click", saveAccount);
+      els.saveMoneyRecord.addEventListener("click", saveMoneyRecordFromForm);
+      els.exportJson.addEventListener("click", exportJson);
+      els.importJson.addEventListener("click", importJson);
+      els.cancelRecordEdit.addEventListener("click", closeRecordEditor);
+      els.saveRecordEdit.addEventListener("click", saveRecordEdit);
+    }
+
+    function showView(name) {
+      closeRecordEditor();
+      document.querySelectorAll(".view").forEach((view) => {
+        view.classList.toggle("active", view.id === `${name}View`);
+      });
+      document.querySelectorAll(".nav-btn").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === name);
+      });
+      renderAll();
+    }
+
+    function buildCategoryButtons() {
+      els.categorySections.innerHTML = "";
+      CATEGORY_SECTIONS.forEach((section) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "category-section";
+        const title = document.createElement("h3");
+        title.className = "sub-title";
+        title.textContent = section.title;
+        const note = document.createElement("p");
+        note.className = "sub-note";
+        note.textContent = section.note;
+        const grid = document.createElement("div");
+        grid.className = "category-grid";
+        section.keys.forEach((key) => {
+          const def = CATEGORY_DEFS[key];
+          if (!def) return;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "category-btn";
+          button.dataset.category = key;
+          button.dataset.group = def.group;
+          button.textContent = def.label;
+          button.addEventListener("click", () => buildQuickForm(key));
+          grid.appendChild(button);
+        });
+        wrapper.append(title, note, grid);
+        els.categorySections.appendChild(wrapper);
+      });
+    }
+
+    function buildQuickForm(category) {
+      selectedCategory = category;
+      const def = CATEGORY_DEFS[category];
+      selectedReason = CHIPS.reason[def.group][0];
+      selectedMood = def.group === "mind" || def.group === "health" ? "不安" : "安定";
+      selectedQuickMeaning = "必要";
+      selectedQuickFuture = "今を保つために必要";
+      els.noteInput.value = "";
+      els.shinoFact.value = "";
+      els.shinoInterpretation.value = "";
+      els.shinoReaction.value = "";
+      els.quickTitle.textContent = `${def.label}を記録`;
+
+      document.querySelectorAll(".category-btn").forEach((button) => {
+        button.classList.toggle("selected", button.dataset.category === category);
+      });
+
+      els.amountField.style.display = def.kind === "state" ? "none" : "grid";
+      els.expenseExtraBlock.style.display = ["expense", "creditExpense"].includes(def.moneyType) ? "grid" : "none";
+      els.shinoDetailBlock.style.display = category === "shinoAnxiety" ? "grid" : "none";
+
+      if (def.kind !== "state") {
+        els.amountLabel.textContent = def.kind === "money" ? "金額" : "時間";
+        els.amountInput.value = String(settings.quickDefaults[category] || def.defaultValue);
+        els.amountInput.placeholder = def.kind === "money" ? "円" : "分";
+        els.amountChips.innerHTML = "";
+        const values = def.kind === "money" ? CHIPS.money : CHIPS.duration;
+        values.forEach((value) => {
+          const chip = createChip(def.kind === "money" ? `${value}円` : `${value}分`, false, () => {
+            els.amountInput.value = value;
+            markAmountChip(value);
+          });
+          chip.dataset.value = value;
+          els.amountChips.appendChild(chip);
+        });
+        markAmountChip(Number(els.amountInput.value));
+      }
+
+      renderSingleChoice(els.reasonChips, CHIPS.reason[def.group], selectedReason, (value) => {
+        selectedReason = value;
+      });
+      renderSingleChoice(els.moodChips, CHIPS.moods, selectedMood, (value) => {
+        selectedMood = value;
+      });
+      renderSingleChoice(els.quickMeaningChips, CHIPS.meanings, selectedQuickMeaning, (value) => {
+        selectedQuickMeaning = value;
+      });
+      renderSingleChoice(els.quickFutureChips, CHIPS.futureValues, selectedQuickFuture, (value) => {
+        selectedQuickFuture = value;
+      });
+    }
+
+    function buildMoneyChoiceControls() {
+      renderSingleChoice(els.moneyTypeChips, CHIPS.moneyTypes, MONEY_TYPE_LABELS[selectedMoneyType] || "支出", (value) => {
+        selectedMoneyType = MONEY_TYPE_MAP[value];
+        renderMoneyTypeState();
+      });
+      renderSingleChoice(els.moneyMeaningChips, CHIPS.meanings, selectedMoneyMeaning, (value) => {
+        selectedMoneyMeaning = value;
+      });
+      renderSingleChoice(els.moneyFutureChips, CHIPS.futureValues, selectedMoneyFuture, (value) => {
+        selectedMoneyFuture = value;
+      });
+      renderMoneyTypeState();
+    }
+
+    function markAmountChip(value) {
+      els.amountChips.querySelectorAll(".chip").forEach((button) => {
+        button.classList.toggle("selected", Number(button.dataset.value) === Number(value));
+      });
+    }
+
+    function renderSingleChoice(container, values, current, onSelect) {
+      container.innerHTML = "";
+      values.forEach((value) => {
+        const chip = createChip(value, value === current, () => {
+          onSelect(value);
+          renderSingleChoice(container, values, value, onSelect);
+        });
+        container.appendChild(chip);
+      });
+    }
+
+    function renderMultiChoice(container, values, selected, onChange) {
+      container.innerHTML = "";
+      values.forEach((value) => {
+        const chip = createChip(value, selected.includes(value), () => {
+          const next = selected.includes(value)
+            ? selected.filter((item) => item !== value)
+            : selected.concat(value);
+          onChange(next);
+          renderMultiChoice(container, values, next, onChange);
+        });
+        container.appendChild(chip);
+      });
+    }
+
+    function createChip(label, selected, onClick) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = selected ? "chip selected" : "chip";
+      button.textContent = label;
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function saveFastRecord(category) {
+      const def = CATEGORY_DEFS[category];
+      const value = settings.quickDefaults[category] ?? def.defaultValue;
+      const reason = def.group === "build" ? "少しだけ" :
+        def.group === "money" ? "食費" :
+        def.group === "mind" ? "詩乃不安" :
+        def.group === "health" ? "体調悪い" : "観測";
+      const mood = def.group === "mind" || def.group === "health" ? "不安" : "未選択";
+      const extra = category === "expense"
+        ? { expenseMeaning: "必要", futureValue: "今を保つために必要" }
+        : {};
+      const record = addRecord(category, value, reason, mood, "ホーム即時記録", extra);
+      if (def.group === "money") {
+        createMoneyRecordFromObservation(record, value, "食費", "必要", "今を保つために必要", "ホーム即時記録", def.moneyType || "expense");
+      }
+      showToast(`${def.label}を観測しました。未記録より前進です`, "修正", () => openRecordEditor(record.id));
+    }
+
+    function saveQuickRecord() {
+      const def = CATEGORY_DEFS[selectedCategory];
+      const value = def.kind === "state" ? 0 : Math.max(0, Number(els.amountInput.value || 0));
+      if (def.kind !== "state" && value <= 0) {
+        showToast("0より大きい値を入れてください");
+        return;
+      }
+      settings.quickDefaults[selectedCategory] = value || def.defaultValue;
+      saveObject(STORAGE_KEYS.settings, settings);
+
+      const extra = {};
+      if (["expense", "creditExpense"].includes(def.moneyType)) {
+        extra.expenseMeaning = selectedQuickMeaning;
+        extra.futureValue = selectedQuickFuture;
+      }
+      if (selectedCategory === "shinoAnxiety") {
+        extra.shinoDetail = {
+          fact: els.shinoFact.value.trim(),
+          interpretation: els.shinoInterpretation.value.trim(),
+          reaction: els.shinoReaction.value.trim()
+        };
+      }
+
+      const record = addRecord(selectedCategory, value, selectedReason, selectedMood, els.noteInput.value.trim(), extra);
+      if (def.group === "money") {
+        createMoneyRecordFromObservation(record, value, selectedReason, selectedQuickMeaning, selectedQuickFuture, els.noteInput.value.trim(), def.moneyType || "expense");
+      }
+      els.noteInput.value = "";
+      showToast(`${def.label}を保存しました`, "修正", () => openRecordEditor(record.id));
+    }
+
+    function addRecord(category, value, reason, mood, note, extra = {}) {
+      const def = CATEGORY_DEFS[category];
+      const record = {
+        id: makeId(),
+        date: todayKey(),
+        time: timeKey(),
+        category,
+        categoryLabel: def.label,
+        type: def.group,
+        amountMinutes: def.kind === "duration" ? value : 0,
+        amountYen: def.kind === "money" ? value : 0,
+        reason,
+        mood,
+        note: note || "",
+        contextTag: extra.contextTag || def.contextTag || "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...extra
+      };
+      records.push(record);
+      saveArray(STORAGE_KEYS.records, records);
+      renderAll();
+      return record;
+    }
+
+    function createMoneyRecordFromObservation(record, amount, category, meaning, futureValue, note, moneyType = "expense") {
+      ensureDefaultAccount();
+      if (["creditExpense", "creditPayment"].includes(moneyType)) ensureDefaultCreditAccount();
+      const accountId = getDefaultMoneyAccountId(moneyType);
+      const toAccountId = getDefaultMoneyToAccountId(moneyType, accountId);
+      const moneyRecord = {
+        id: makeId(),
+        date: record.date,
+        time: record.time,
+        type: moneyType,
+        accountId,
+        toAccountId,
+        amount: Number(amount || 0),
+        category: category || "食費",
+        meaning: ["expense", "creditExpense"].includes(moneyType) ? (meaning || "必要") : "その他",
+        futureValue: ["expense", "creditExpense"].includes(moneyType) ? (futureValue || "今を保つために必要") : "今を保つために必要",
+        note: note || "生活観測から記録",
+        linkedRecordId: record.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      applyMoneyRecordEffect(moneyRecord, 1);
+      moneyRecords.push(moneyRecord);
+      record.moneyRecordId = moneyRecord.id;
+      saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+      saveArray(STORAGE_KEYS.records, records);
+      saveArray(STORAGE_KEYS.accounts, accounts);
+      renderAll();
+      return moneyRecord;
+    }
+
+    function saveDailyReview() {
+      const summary = getTodaySummary();
+      const moneySummary = getMoneySummary();
+      const date = todayKey();
+      dailyReviews[date] = {
+        date,
+        escapeMinutes: summary.escapeMinutes,
+        buildMinutes: summary.buildMinutes,
+        expenseYen: moneySummary.todayExpense,
+        mentalState: reviewState.mentalState,
+        escapeCauses: reviewState.escapeCauses,
+        wins: reviewState.wins,
+        tomorrowFix: reviewState.tomorrowFix,
+        note: els.reviewNote.value.trim(),
+        completedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      saveObject(STORAGE_KEYS.dailyReviews, dailyReviews);
+      showToast("今日を責めずに確定しました");
+      renderAll();
+      showView("home");
+    }
+
+    function openRecordEditor(id) {
+      const record = records.find((item) => item.id === id);
+      if (!record) return;
+      editingRecordId = id;
+      els.recordEditTitle.textContent = `${record.categoryLabel}を修正`;
+      const isState = !record.amountMinutes && !record.amountYen;
+      els.recordEditAmountField.style.display = isState ? "none" : "grid";
+      els.recordEditAmountLabel.textContent = record.amountYen ? "金額" : "時間";
+      els.recordEditAmount.value = record.amountYen || record.amountMinutes || 0;
+      els.recordEditReason.value = record.reason || "";
+      els.recordEditMood.value = record.mood || "";
+      els.recordEditNote.value = record.note || "";
+      const shinoDetail = record.shinoDetail || {};
+      els.recordEditShinoBlock.style.display = record.category === "shinoAnxiety" ? "grid" : "none";
+      els.recordEditShinoFact.value = shinoDetail.fact || "";
+      els.recordEditShinoInterpretation.value = shinoDetail.interpretation || "";
+      els.recordEditShinoReaction.value = shinoDetail.reaction || "";
+      els.recordEditor.classList.add("show");
+    }
+
+    function closeRecordEditor() {
+      editingRecordId = "";
+      els.recordEditor.classList.remove("show");
+    }
+
+    function saveRecordEdit() {
+      const record = records.find((item) => item.id === editingRecordId);
+      if (!record) return;
+      const oldAmountYen = record.amountYen;
+      const oldAmountMinutes = record.amountMinutes;
+      const nextAmount = Number(els.recordEditAmount.value || 0);
+      if (record.amountYen) record.amountYen = Math.max(0, nextAmount);
+      if (record.amountMinutes) record.amountMinutes = Math.max(0, nextAmount);
+      record.reason = els.recordEditReason.value.trim();
+      record.mood = els.recordEditMood.value.trim();
+      record.note = els.recordEditNote.value.trim();
+      record.updatedAt = new Date().toISOString();
+      if (record.category === "shinoAnxiety") {
+        record.shinoDetail = {
+          fact: els.recordEditShinoFact.value.trim(),
+          interpretation: els.recordEditShinoInterpretation.value.trim(),
+          reaction: els.recordEditShinoReaction.value.trim()
+        };
+      }
+      if (record.moneyRecordId) {
+        const moneyRecord = moneyRecords.find((item) => item.id === record.moneyRecordId);
+        if (moneyRecord) {
+          applyMoneyRecordEffect(moneyRecord, -1);
+          moneyRecord.amount = record.amountYen || moneyRecord.amount;
+          moneyRecord.category = record.reason || moneyRecord.category;
+          moneyRecord.note = record.note || moneyRecord.note;
+          moneyRecord.updatedAt = new Date().toISOString();
+          applyMoneyRecordEffect(moneyRecord, 1);
+          saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+          saveArray(STORAGE_KEYS.accounts, accounts);
+        }
+      }
+      if (oldAmountYen !== record.amountYen || oldAmountMinutes !== record.amountMinutes) {
+        settings.quickDefaults[record.category] = record.amountYen || record.amountMinutes || settings.quickDefaults[record.category];
+        saveObject(STORAGE_KEYS.settings, settings);
+      }
+      saveArray(STORAGE_KEYS.records, records);
+      closeRecordEditor();
+      renderAll();
+      showToast("記録を修正しました");
+    }
+
+    function deleteRecord(id) {
+      const record = records.find((item) => item.id === id);
+      if (record && record.moneyRecordId) {
+        deleteMoneyRecord(record.moneyRecordId, false);
+      }
+      records = records.filter((item) => item.id !== id);
+      saveArray(STORAGE_KEYS.records, records);
+      renderAll();
+      showToast("記録を削除しました");
+    }
+
+    function resetAccountForm() {
+      els.accountFormTitle.textContent = "口座を追加";
+      els.accountEditId.value = "";
+      els.accountName.value = "";
+      els.accountType.value = "cash";
+      els.accountBalance.value = "0";
+      els.accountIsDebt.checked = false;
+    }
+
+    function editAccount(id) {
+      const account = accounts.find((item) => item.id === id);
+      if (!account) return;
+      els.accountFormTitle.textContent = "口座を編集";
+      els.accountEditId.value = account.id;
+      els.accountName.value = account.name;
+      els.accountType.value = account.type;
+      els.accountBalance.value = account.balance;
+      els.accountIsDebt.checked = Boolean(account.isDebt);
+      showView("money");
+    }
+
+    function saveAccount() {
+      const name = els.accountName.value.trim() || "名称未設定";
+      const now = new Date().toISOString();
+      const editingId = els.accountEditId.value;
+      const payload = {
+        name,
+        type: els.accountType.value,
+        balance: Number(els.accountBalance.value || 0),
+        isDebt: els.accountType.value === "credit" ? true : els.accountIsDebt.checked,
+        updatedAt: now
+      };
+      if (editingId) {
+        const account = accounts.find((item) => item.id === editingId);
+        if (account) Object.assign(account, payload);
+      } else {
+        accounts.push({
+          id: makeId(),
+          createdAt: now,
+          ...payload
+        });
+      }
+      saveArray(STORAGE_KEYS.accounts, accounts);
+      resetAccountForm();
+      renderAll();
+      showToast("残高を観測しました");
+    }
+
+    function saveMonthlyBudget() {
+      settings.monthlyBudget = Math.max(0, Number(els.monthlyBudgetInput.value || 0));
+      saveObject(STORAGE_KEYS.settings, settings);
+      renderAll();
+      showToast("月予算を保存しました");
+    }
+
+    function resetMoneyForm() {
+      els.moneyFormTitle.textContent = "お金の動きを記録";
+      els.moneyEditId.value = "";
+      selectedMoneyType = "expense";
+      selectedMoneyMeaning = "必要";
+      selectedMoneyFuture = "今を保つために必要";
+      els.moneyAmount.value = "0";
+      els.moneyCategory.value = "食費";
+      els.moneyNote.value = "";
+      buildMoneyChoiceControls();
+      renderAccountSelects();
+    }
+
+    function saveMoneyRecordFromForm() {
+      const amount = Math.max(0, Number(els.moneyAmount.value || 0));
+      if (amount <= 0) {
+        showToast("金額を入れてください");
+        return;
+      }
+      if (!els.moneyAccount.value) {
+        showToast("口座を1つ追加してください");
+        return;
+      }
+      if (["transfer", "creditPayment"].includes(selectedMoneyType) && !els.moneyToAccount.value) {
+        showToast(selectedMoneyType === "creditPayment" ? "返済先クレカ口座を選んでください" : "振替先を選んでください");
+        return;
+      }
+      if (selectedMoneyType === "creditExpense" && !isCreditDebtAccount(els.moneyAccount.value)) {
+        showToast("クレカ負債口座を選んでください");
+        return;
+      }
+      if (selectedMoneyType === "creditPayment" && !isCreditDebtAccount(els.moneyToAccount.value)) {
+        showToast("返済先にはクレカ負債口座を選んでください");
+        return;
+      }
+      const now = new Date().toISOString();
+      const editingId = els.moneyEditId.value;
+      if (editingId) {
+        const existing = moneyRecords.find((item) => item.id === editingId);
+        if (!existing) return;
+        applyMoneyRecordEffect(existing, -1);
+        Object.assign(existing, moneyRecordPayload(amount, now), { updatedAt: now });
+        applyMoneyRecordEffect(existing, 1);
+        syncLinkedObservation(existing);
+        showToast("お金の動きを修正しました");
+      } else {
+        const record = {
+          id: makeId(),
+          date: todayKey(),
+          time: timeKey(),
+          createdAt: now,
+          updatedAt: now,
+          ...moneyRecordPayload(amount, now)
+        };
+        applyMoneyRecordEffect(record, 1);
+        moneyRecords.push(record);
+        showToast(isSpendingType(record.type) ? "支出を観測しました。今日のお金の動きが見えました" : "お金の動きを観測しました", "修正", () => editMoneyRecord(record.id));
+      }
+      saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+      saveArray(STORAGE_KEYS.accounts, accounts);
+      resetMoneyForm();
+      renderAll();
+    }
+
+    function moneyRecordPayload(amount) {
+      return {
+        type: selectedMoneyType,
+        accountId: els.moneyAccount.value,
+        toAccountId: ["transfer", "creditPayment"].includes(selectedMoneyType) ? els.moneyToAccount.value : "",
+        amount,
+        category: els.moneyCategory.value.trim() || "未分類",
+        meaning: isSpendingType(selectedMoneyType) ? selectedMoneyMeaning : "その他",
+        futureValue: isSpendingType(selectedMoneyType) ? selectedMoneyFuture : "今を保つために必要",
+        note: els.moneyNote.value.trim()
+      };
+    }
+
+    function saveMoneyTemplate(template) {
+      ensureDefaultAccount();
+      const now = new Date().toISOString();
+      const record = {
+        id: makeId(),
+        date: todayKey(),
+        time: timeKey(),
+        type: "expense",
+        accountId: getDefaultAccountId(),
+        toAccountId: "",
+        amount: template.amount,
+        category: template.category,
+        meaning: template.meaning,
+        futureValue: template.futureValue,
+        note: template.name,
+        createdAt: now,
+        updatedAt: now
+      };
+      applyMoneyRecordEffect(record, 1);
+      moneyRecords.push(record);
+      saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+      saveArray(STORAGE_KEYS.accounts, accounts);
+      renderAll();
+      showToast(`${template.name}を観測しました`, "修正", () => editMoneyRecord(record.id));
+    }
+
+    function editMoneyRecord(id) {
+      const record = moneyRecords.find((item) => item.id === id);
+      if (!record) return;
+      showView("money");
+      els.moneyFormTitle.textContent = "お金の動きを修正";
+      els.moneyEditId.value = record.id;
+      selectedMoneyType = record.type;
+      selectedMoneyMeaning = record.meaning || "必要";
+      selectedMoneyFuture = record.futureValue || "今を保つために必要";
+      els.moneyAmount.value = record.amount;
+      els.moneyCategory.value = record.category || "";
+      els.moneyNote.value = record.note || "";
+      buildMoneyChoiceControls();
+      renderAccountSelects();
+      els.moneyAccount.value = record.accountId || "";
+      els.moneyToAccount.value = record.toAccountId || "";
+      renderMoneyTypeState();
+    }
+
+    function deleteMoneyRecord(id, render = true) {
+      const record = moneyRecords.find((item) => item.id === id);
+      if (record) {
+        applyMoneyRecordEffect(record, -1);
+        if (record.linkedRecordId) {
+          const linked = records.find((item) => item.id === record.linkedRecordId);
+          if (linked) linked.moneyRecordId = "";
+        }
+      }
+      moneyRecords = moneyRecords.filter((item) => item.id !== id);
+      saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+      saveArray(STORAGE_KEYS.accounts, accounts);
+      saveArray(STORAGE_KEYS.records, records);
+      if (render) {
+        renderAll();
+        showToast("お金の記録を削除しました");
+      }
+    }
+
+    function syncLinkedObservation(moneyRecord) {
+      if (!moneyRecord.linkedRecordId) return;
+      const linked = records.find((item) => item.id === moneyRecord.linkedRecordId);
+      if (!linked) return;
+      linked.amountYen = moneyRecord.amount;
+      linked.reason = moneyRecord.category;
+      linked.expenseMeaning = moneyRecord.meaning;
+      linked.futureValue = moneyRecord.futureValue;
+      linked.note = moneyRecord.note;
+      linked.updatedAt = new Date().toISOString();
+      saveArray(STORAGE_KEYS.records, records);
+    }
+
+    function applyMoneyRecordEffect(record, direction) {
+      const from = accounts.find((account) => account.id === record.accountId);
+      const to = accounts.find((account) => account.id === record.toAccountId);
+      if (record.type === "expense" && from) {
+        applyAccountDelta(from, -record.amount * direction);
+      }
+      if (record.type === "income" && from) {
+        applyAccountDelta(from, record.amount * direction);
+      }
+      if (record.type === "transfer") {
+        if (from) applyAccountDelta(from, -record.amount * direction);
+        if (to) applyAccountDelta(to, record.amount * direction);
+      }
+      if (record.type === "creditExpense" && from) {
+        applyAccountDelta(from, -record.amount * direction);
+      }
+      if (record.type === "creditPayment") {
+        if (from) applyAccountDelta(from, -record.amount * direction);
+        if (to) applyAccountDelta(to, record.amount * direction);
+      }
+    }
+
+    function applyAccountDelta(account, normalDelta) {
+      account.balance = Number(account.balance || 0) + (account.isDebt ? -normalDelta : normalDelta);
+      account.updatedAt = new Date().toISOString();
+    }
+
+    function isSpendingType(type) {
+      return ["expense", "creditExpense"].includes(type);
+    }
+
+    function isCreditDebtAccount(id) {
+      const account = accounts.find((item) => item.id === id);
+      return Boolean(account && account.type === "credit" && account.isDebt);
+    }
+
+    function renderAll() {
+      const date = todayKey();
+      const summary = getTodaySummary(date);
+      const moneySummary = getMoneySummary();
+      const review = dailyReviews[date];
+      const observed = summary.observationCount > 0 || Boolean(review);
+
+      els.todayLabel.textContent = formatToday();
+      els.observePill.textContent = observed ? "観測済み" : "未観測";
+      els.observePill.classList.toggle("observed", observed);
+      els.observePill.classList.toggle("unobserved", !observed);
+      els.stateText.textContent = observed ? "観測済み" : "未観測";
+
+      els.homeNetWorth.textContent = formatYen(moneySummary.netWorth);
+      els.homeLastBalance.textContent = `最終残高更新: ${moneySummary.lastBalanceDate}`;
+      els.homeMonthExpense.textContent = formatYen(moneySummary.monthExpense);
+      els.homeExpense.textContent = formatYen(moneySummary.todayExpense);
+      els.homeBudgetLeft.textContent = settings.monthlyBudget > 0 ? formatYen(moneySummary.budgetLeft) : "未設定";
+      els.homeEscape.textContent = `${summary.escapeMinutes}分`;
+      els.homeBuild.textContent = `${summary.buildMinutes}分`;
+      els.homeMind.textContent = getMindLabel(summary, review);
+
+      els.observeCount.textContent = `${summary.observationCount}件`;
+      els.unobservedAvoided.textContent = observed ? "回避済み" : "未観測";
+      els.escapeObserved.textContent = summary.escapeMinutes > 0 ? "逃避も観測済み" : "まだ未観測";
+      els.todayPlusShort.textContent = observed ? "見えた" : "1件でOK";
+      els.todayPlusMessage.textContent = getPlusMessage(summary, observed);
+      els.reviewWarning.classList.toggle("show", !review);
+
+      els.reviewEscape.textContent = `${summary.escapeMinutes}分`;
+      els.reviewBuild.textContent = `${summary.buildMinutes}分`;
+      els.reviewExpense.textContent = formatYen(moneySummary.todayExpense);
+
+      els.moneyNetWorth.textContent = formatYen(moneySummary.netWorth);
+      els.moneyLastBalance.textContent = `最終残高更新: ${moneySummary.lastBalanceDate}`;
+      els.moneyMonthExpense.textContent = formatYen(moneySummary.monthExpense);
+      els.moneyBudgetLeft.textContent = settings.monthlyBudget > 0 ? formatYen(moneySummary.budgetLeft) : "未設定";
+      els.monthlyBudgetInput.value = String(settings.monthlyBudget || 0);
+
+      renderTodayRecords(summary.records);
+      renderReviewForm(review);
+      renderAccounts();
+      renderAccountSelects();
+      renderMoneyTemplates();
+      renderMonthMoneyRecords();
+      renderHistory();
+    }
+
+    function renderTodayRecords(todayItems) {
+      els.todayRecords.innerHTML = "";
+      if (todayItems.length === 0) {
+        renderEmpty(els.todayRecords, "まだ記録はありません");
+        return;
+      }
+
+      todayItems.slice().reverse().forEach((record) => {
+        const item = document.createElement("div");
+        item.className = "record-item";
+        const main = document.createElement("div");
+        main.className = "record-main";
+        const title = document.createElement("div");
+        title.className = "record-title";
+        title.textContent = `${record.time} ${record.categoryLabel} ${recordAmountText(record)}`;
+        const meta = document.createElement("div");
+        meta.className = "record-meta";
+        const shino = record.shinoDetail && (record.shinoDetail.fact || record.shinoDetail.interpretation || record.shinoDetail.reaction)
+          ? "詩乃への自分の反応を詳細観測"
+          : "";
+        meta.textContent = [record.contextTag, record.reason, record.mood, record.expenseMeaning, record.futureValue, shino, record.note].filter(Boolean).join(" / ");
+        const actions = document.createElement("div");
+        actions.className = "record-actions";
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "edit-btn";
+        edit.textContent = "修正";
+        edit.addEventListener("click", () => openRecordEditor(record.id));
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "delete-btn";
+        del.textContent = "削除";
+        del.addEventListener("click", () => deleteRecord(record.id));
+        main.append(title, meta);
+        actions.append(edit, del);
+        item.append(main, actions);
+        els.todayRecords.appendChild(item);
+      });
+    }
+
+    function renderAccounts() {
+      els.accountList.innerHTML = "";
+      if (accounts.length === 0) {
+        renderEmpty(els.accountList, "口座を追加すると総資産が見えます");
+        return;
+      }
+      accounts.forEach((account) => {
+        const item = document.createElement("div");
+        item.className = "account-item";
+        const main = document.createElement("div");
+        main.className = "account-main";
+        const title = document.createElement("div");
+        title.className = "account-title";
+        title.textContent = `${account.name} ${formatYen(account.balance)}`;
+        const meta = document.createElement("div");
+        meta.className = "account-meta";
+        meta.textContent = `${ACCOUNT_TYPE_LABELS[account.type] || account.type} / ${account.isDebt ? "負債" : "資産"} / 更新 ${formatDateShort(account.updatedAt)}`;
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "edit-btn";
+        edit.textContent = "編集";
+        edit.addEventListener("click", () => editAccount(account.id));
+        main.append(title, meta);
+        item.append(main, edit);
+        els.accountList.appendChild(item);
+      });
+    }
+
+    function renderAccountSelects() {
+      const currentFrom = els.moneyAccount.value;
+      const currentTo = els.moneyToAccount.value;
+      const fromAccounts = selectedMoneyType === "creditExpense"
+        ? accounts.filter((account) => account.type === "credit" && account.isDebt)
+        : selectedMoneyType === "creditPayment"
+          ? accounts.filter((account) => !account.isDebt)
+          : accounts;
+      const toAccounts = selectedMoneyType === "creditPayment"
+        ? accounts.filter((account) => account.type === "credit" && account.isDebt)
+        : accounts;
+      fillAccountSelect(els.moneyAccount, fromAccounts, currentFrom);
+      fillAccountSelect(els.moneyToAccount, toAccounts, currentTo);
+    }
+
+    function fillAccountSelect(select, items, current) {
+      select.innerHTML = "";
+      items.forEach((account) => {
+        const option = document.createElement("option");
+        option.value = account.id;
+        option.textContent = `${account.name} (${formatYen(account.balance)})`;
+        select.appendChild(option);
+      });
+      if (items.some((account) => account.id === current)) select.value = current;
+    }
+
+    function renderMoneyTypeState() {
+      if (["creditExpense", "creditPayment"].includes(selectedMoneyType)) ensureDefaultCreditAccount();
+      renderAccountSelects();
+      els.toAccountField.style.display = ["transfer", "creditPayment"].includes(selectedMoneyType) ? "grid" : "none";
+      els.fromAccountLabel.textContent = selectedMoneyType === "income"
+        ? "入金先口座"
+        : selectedMoneyType === "creditExpense"
+          ? "クレカ口座"
+          : "支払い元口座";
+      els.toAccountLabel.textContent = selectedMoneyType === "creditPayment" ? "返済先クレカ口座" : "振替先口座";
+      if (selectedMoneyType === "creditExpense") {
+        if (!isCreditDebtAccount(els.moneyAccount.value)) els.moneyAccount.value = getDefaultCreditAccountId();
+      }
+      if (selectedMoneyType === "creditPayment") {
+        if (!els.moneyAccount.value || isCreditDebtAccount(els.moneyAccount.value)) els.moneyAccount.value = getDefaultAccountId();
+        if (!isCreditDebtAccount(els.moneyToAccount.value)) els.moneyToAccount.value = getDefaultCreditAccountId();
+      }
+      if (selectedMoneyType === "transfer") {
+        const from = els.moneyAccount.value || getDefaultAccountId();
+        if (!els.moneyToAccount.value) els.moneyToAccount.value = getDefaultMoneyToAccountId("transfer", from);
+      }
+      els.moneyCategoryField.style.display = selectedMoneyType === "creditPayment" ? "none" : "grid";
+      els.moneyMeaningChips.parentElement.style.display = isSpendingType(selectedMoneyType) ? "grid" : "none";
+      els.moneyFutureChips.parentElement.style.display = isSpendingType(selectedMoneyType) ? "grid" : "none";
+    }
+
+    function renderMoneyTemplates() {
+      els.moneyTemplates.innerHTML = "";
+      settings.moneyTemplates.forEach((template) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "template-btn";
+        button.innerHTML = `<span>${escapeHtml(template.name)} ${formatYen(template.amount)}</span><small>${escapeHtml(template.category)} / ${escapeHtml(template.meaning)}</small>`;
+        button.addEventListener("click", () => saveMoneyTemplate(template));
+        els.moneyTemplates.appendChild(button);
+      });
+    }
+
+    function renderMonthMoneyRecords() {
+      els.monthMoneyRecords.innerHTML = "";
+      const month = monthKey();
+      const items = moneyRecords.filter((record) => record.date.startsWith(month));
+      if (items.length === 0) {
+        renderEmpty(els.monthMoneyRecords, "今月のお金の動きはまだ未観測です");
+        return;
+      }
+      items.slice().reverse().forEach((record) => {
+        const item = document.createElement("div");
+        item.className = "record-item";
+        const main = document.createElement("div");
+        main.className = "record-main";
+        const title = document.createElement("div");
+        title.className = "record-title";
+        title.textContent = `${record.date} ${MONEY_TYPE_LABELS[record.type]} ${formatYen(record.amount)}`;
+        const meta = document.createElement("div");
+        meta.className = "record-meta";
+        meta.textContent = [
+          getAccountName(record.accountId),
+          record.type === "transfer" ? `-> ${getAccountName(record.toAccountId)}` : "",
+          record.category,
+          record.meaning,
+          record.futureValue,
+          record.note
+        ].filter(Boolean).join(" / ");
+        const actions = document.createElement("div");
+        actions.className = "record-actions";
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "edit-btn";
+        edit.textContent = "修正";
+        edit.addEventListener("click", () => editMoneyRecord(record.id));
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "delete-btn";
+        del.textContent = "削除";
+        del.addEventListener("click", () => deleteMoneyRecord(record.id));
+        main.append(title, meta);
+        actions.append(edit, del);
+        item.append(main, actions);
+        els.monthMoneyRecords.appendChild(item);
+      });
+    }
+
+    function renderReviewForm(review) {
+      if (review) {
+        reviewState = {
+          mentalState: review.mentalState || "安定",
+          escapeCauses: review.escapeCauses || [],
+          wins: review.wins || [],
+          tomorrowFix: review.tomorrowFix || "寝る前スマホを置く"
+        };
+        els.reviewNote.value = review.note || "";
+      }
+
+      renderSingleChoice(els.reviewMindChips, CHIPS.reviewMind, reviewState.mentalState, (value) => {
+        reviewState.mentalState = value;
+      });
+      renderMultiChoice(els.causeChips, CHIPS.causes, reviewState.escapeCauses, (value) => {
+        reviewState.escapeCauses = value;
+      });
+      renderMultiChoice(els.winChips, CHIPS.wins, reviewState.wins, (value) => {
+        reviewState.wins = value;
+      });
+      renderSingleChoice(els.fixChips, CHIPS.fixes, reviewState.tomorrowFix, (value) => {
+        reviewState.tomorrowFix = value;
+      });
+    }
+
+    function renderHistory() {
+      els.historyList.innerHTML = "";
+      for (let offset = 0; offset < 7; offset++) {
+        const date = dateKeyFromOffset(offset);
+        const summary = getTodaySummary(date);
+        const review = dailyReviews[date];
+        const expense = getExpenseForDate(date);
+        const item = document.createElement("div");
+        item.className = "history-item";
+        const title = document.createElement("div");
+        title.className = "history-title";
+        title.textContent = `${date} ${summary.observationCount > 0 || review ? "観測済み" : "未観測"}`;
+        const meta = document.createElement("div");
+        meta.className = "history-meta";
+        meta.textContent = [
+          `逃避 ${summary.escapeMinutes}分`,
+          `積み上げ ${summary.buildMinutes}分`,
+          `支出 ${formatYen(expense)}`,
+          `精神 ${getMindLabel(summary, review)}`,
+          `夜レビュー ${review ? "済" : "未"}`
+        ].join(" / ");
+        item.append(title, meta);
+        els.historyList.appendChild(item);
+      }
+    }
+
+    function renderEmpty(container, message) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = message;
+      container.appendChild(empty);
+    }
+
+    function getTodaySummary(date = todayKey()) {
+      const dayRecords = records.filter((record) => record.date === date);
+      const independentMoneyRecords = moneyRecords.filter((record) => record.date === date && !record.linkedRecordId);
+      return {
+        records: dayRecords,
+        count: dayRecords.length,
+        observationCount: dayRecords.length + independentMoneyRecords.length,
+        escapeMinutes: sumBy(dayRecords, (record) => record.type === "escape" ? record.amountMinutes : 0),
+        buildMinutes: sumBy(dayRecords, (record) => record.type === "build" ? record.amountMinutes : 0),
+        mindRecords: dayRecords.filter((record) => record.type === "mind" || record.type === "health")
+      };
+    }
+
+    function getMoneySummary() {
+      const today = todayKey();
+      const month = monthKey();
+      const todayExpense = sumBy(moneyRecords, (record) => record.date === today && isSpendingType(record.type) ? record.amount : 0);
+      const monthExpense = sumBy(moneyRecords, (record) => record.date.startsWith(month) && isSpendingType(record.type) ? record.amount : 0);
+      const netWorth = sumBy(accounts, (account) => account.isDebt ? -Number(account.balance || 0) : Number(account.balance || 0));
+      const latest = accounts
+        .map((account) => account.updatedAt)
+        .filter(Boolean)
+        .sort()
+        .pop();
+      return {
+        todayExpense,
+        monthExpense,
+        netWorth,
+        budgetLeft: Number(settings.monthlyBudget || 0) - monthExpense,
+        lastBalanceDate: latest ? formatDateShort(latest) : "未設定"
+      };
+    }
+
+    function getExpenseForDate(date) {
+      return sumBy(moneyRecords, (record) => record.date === date && isSpendingType(record.type) ? record.amount : 0);
+    }
+
+    function getMindLabel(summary, review) {
+      if (review && review.mentalState) return review.mentalState;
+      if (summary.mindRecords.length === 0) return "未観測";
+      return summary.mindRecords[summary.mindRecords.length - 1].categoryLabel;
+    }
+
+    function getPlusMessage(summary, observed) {
+      if (!observed) return "未記録は失敗ではなく未観測です。1件だけでも見えれば前進です。";
+      if (summary.escapeMinutes > 0) return "逃避も観測済みです。責める材料ではなく、次の選択を軽くする材料です。";
+      return "今日を観測できています。記録したこと自体がプラスです。";
+    }
+
+    function recordAmountText(record) {
+      if (record.amountMinutes) return `${record.amountMinutes}分`;
+      if (record.amountYen) return formatYen(record.amountYen);
+      return "状態";
+    }
+
+    function exportJson() {
+      const payload = {
+        app: "lifeObserver",
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        records,
+        dailyReviews,
+        settings,
+        accounts,
+        moneyRecords
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `life-observer-backup-${todayKey()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("JSONを書き出しました");
+    }
+
+    function importJson() {
+      const file = els.importJsonFile.files[0];
+      if (!file) {
+        showToast("JSONファイルを選んでください");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          const ok = payload && Array.isArray(payload.records) && payload.dailyReviews && payload.settings;
+          if (!ok) {
+            showToast("バックアップ形式を確認してください");
+            return;
+          }
+          if (!window.confirm("現在のデータをバックアップJSONで置き換えます。続けますか？")) return;
+          records = Array.isArray(payload.records) ? payload.records : [];
+          dailyReviews = payload.dailyReviews && typeof payload.dailyReviews === "object" ? payload.dailyReviews : {};
+          settings = normalizeSettings(payload.settings || {});
+          accounts = Array.isArray(payload.accounts) ? payload.accounts : [];
+          moneyRecords = Array.isArray(payload.moneyRecords) ? payload.moneyRecords : [];
+          ensureDefaultAccount();
+          saveArray(STORAGE_KEYS.records, records);
+          saveObject(STORAGE_KEYS.dailyReviews, dailyReviews);
+          saveObject(STORAGE_KEYS.settings, settings);
+          saveArray(STORAGE_KEYS.accounts, accounts);
+          saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+          renderAll();
+          showToast("JSONを読み込みました");
+        } catch {
+          showToast("JSONを読み込めませんでした");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function loadArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function loadObject(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "{}");
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function loadSettings() {
+      return normalizeSettings(loadObject(STORAGE_KEYS.settings));
+    }
+
+    function normalizeSettings(stored) {
+      return {
+        version: 2,
+        createdAt: stored.createdAt || new Date().toISOString(),
+        monthlyBudget: Number(stored.monthlyBudget || 0),
+        quickDefaults: {
+          sns: 15,
+          av: 15,
+          game: 30,
+          youtube: 15,
+          webWandering: 15,
+          sleepEscape: 30,
+          reading: 15,
+          study: 15,
+          testStudy: 15,
+          universityTask: 15,
+          festival: 15,
+          internship: 15,
+          jobHunt: 15,
+          exercise: 15,
+          expense: 500,
+          incomeRecord: 1000,
+          transferRecord: 1000,
+          creditExpense: 1000,
+          creditPayment: 1000,
+          shinoAnxiety: 0,
+          badHealth: 0,
+          fatigue: 0,
+          anxiety: 0,
+          sleepiness: 0,
+          selfDisgust: 0,
+          recovery: 0,
+          ...(stored.quickDefaults || {})
+        },
+        moneyTemplates: Array.isArray(stored.moneyTemplates) && stored.moneyTemplates.length
+          ? stored.moneyTemplates
+          : [
+              { name: "昼食", amount: 700, category: "食費", meaning: "必要", futureValue: "今を保つために必要" },
+              { name: "交通費", amount: 300, category: "交通", meaning: "必要", futureValue: "今を保つために必要" },
+              { name: "コンビニ", amount: 500, category: "食費", meaning: "逃避", futureValue: "逃避だったが観測できた" },
+              { name: "デート", amount: 2000, category: "交際", meaning: "交際", futureValue: "今を保つために必要" },
+              { name: "書籍", amount: 1000, category: "書籍", meaning: "投資", futureValue: "未来の自分を強くした" }
+            ]
+      };
+    }
+
+    function ensureSettings() {
+      saveObject(STORAGE_KEYS.settings, settings);
+    }
+
+    function ensureDefaultAccount() {
+      if (accounts.length > 0) return;
+      const now = new Date().toISOString();
+      accounts.push({
+        id: makeId(),
+        name: "現金",
+        type: "cash",
+        balance: 0,
+        isDebt: false,
+        updatedAt: now,
+        createdAt: now
+      });
+      saveArray(STORAGE_KEYS.accounts, accounts);
+    }
+
+    function ensureDefaultCreditAccount() {
+      if (accounts.some((account) => account.type === "credit" && account.isDebt)) return;
+      const now = new Date().toISOString();
+      accounts.push({
+        id: makeId(),
+        name: "クレカ利用額",
+        type: "credit",
+        balance: 0,
+        isDebt: true,
+        updatedAt: now,
+        createdAt: now
+      });
+      saveArray(STORAGE_KEYS.accounts, accounts);
+    }
+
+    function getDefaultAccountId() {
+      ensureDefaultAccount();
+      const asset = accounts.find((account) => !account.isDebt);
+      return (asset || accounts[0]).id;
+    }
+
+    function getDefaultCreditAccountId() {
+      ensureDefaultCreditAccount();
+      const credit = accounts.find((account) => account.type === "credit" && account.isDebt);
+      return credit ? credit.id : "";
+    }
+
+    function getDefaultMoneyAccountId(type) {
+      if (type === "creditExpense") return getDefaultCreditAccountId();
+      return getDefaultAccountId();
+    }
+
+    function getDefaultMoneyToAccountId(type, fromId) {
+      if (type === "creditPayment") return getDefaultCreditAccountId();
+      if (type === "transfer") {
+        const target = accounts.find((account) => account.id !== fromId);
+        return target ? target.id : fromId || getDefaultAccountId();
+      }
+      return "";
+    }
+
+    function getAccountName(id) {
+      const account = accounts.find((item) => item.id === id);
+      return account ? account.name : "口座未設定";
+    }
+
+    function saveArray(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function saveObject(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function sumBy(items, fn) {
+      return items.reduce((total, item) => total + fn(item), 0);
+    }
+
+    function formatToday() {
+      return new Intl.DateTimeFormat("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "short"
+      }).format(new Date());
+    }
+
+    function todayKey() {
+      return dateKey(new Date());
+    }
+
+    function monthKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function dateKeyFromOffset(offset) {
+      const date = new Date();
+      date.setDate(date.getDate() - offset);
+      return dateKey(date);
+    }
+
+    function dateKey(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function timeKey() {
+      const now = new Date();
+      return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function formatYen(value) {
+      return `${Number(value || 0).toLocaleString("ja-JP")}円`;
+    }
+
+    function formatDateShort(value) {
+      if (!value) return "未設定";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    }
+
+    function makeId() {
+      return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    let toastTimer = 0;
+    function showToast(message, actionLabel = "", action = null) {
+      window.clearTimeout(toastTimer);
+      els.toastText.textContent = message;
+      els.toastAction.textContent = actionLabel;
+      els.toastAction.style.display = actionLabel ? "block" : "none";
+      els.toastAction.onclick = () => {
+        if (action) action();
+        els.toast.classList.remove("show");
+      };
+      els.toast.classList.add("show");
+      toastTimer = window.setTimeout(() => {
+        els.toast.classList.remove("show");
+      }, actionLabel ? 4200 : 1800);
+    }
+  </script>
+</body>
+</html>
