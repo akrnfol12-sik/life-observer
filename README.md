@@ -25,7 +25,6 @@ https://akrnfol12-sik.github.io/life-observer/
 
 - `index.html`: 画面のHTML構造
 - `styles.css`: 既存のスマホ向けUIとホームコックピットのスタイル
-- `pages-fixes.css`: GitHub Pages公開時にも安全に効かせる補正スタイル
 - `app.js` / `app-*.js`: 画面描画、入力処理、集計ロジック
 - `storage.js`: LocalStorageアダプターと保存キー定義
 - `calendar.js`: Google Calendar連携を想定した予定取得モジュール
@@ -47,7 +46,7 @@ https://akrnfol12-sik.github.io/life-observer/
 
 ## Calendar連携について
 
-現時点ではバックエンドやGoogle OAuthを導入せず、`calendar.js` の `Mock Calendar` で予定UIを動かしています。
+現時点ではバックエンドやGoogle OAuthを導入せず、`calendar.js` の「予定メモ」で予定UIを動かしています。
 
 将来Google Calendar APIへ接続する場合は、`window.lifeObserverCalendarProvider` に以下のようなプロバイダーを渡す想定です。
 
@@ -68,6 +67,12 @@ window.lifeObserverCalendarProvider = {
   }
 };
 ```
+
+## v2 UI改善メモ
+
+ホーム画面は、予定、今の状態、お金、クイック記録の順に並べています。最初に「次の予定」と「今の一手」が見えるようにし、総資産や支出は判断材料として少し下に置いています。
+
+他の自己管理アプリの良い点を参考にし、Todoistのように今日に集中する、Google Calendarのように予定の流れを見る、Daylioのように入力を軽くする、Streaks系アプリのように状態を一目で把握する方向で調整しています。
 
 ## 使用技術
 
