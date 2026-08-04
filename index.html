@@ -11,7 +11,6 @@
   <title>生活観測</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="pages-fixes.css">
 </head>
 <body>
   <main class="app">
@@ -27,7 +26,7 @@
       <div class="card cockpit-card">
         <div class="section-head">
           <h2 class="section-title">今日の予定</h2>
-          <span class="source-label" id="calendarSource">Mock Calendar</span>
+          <span class="source-label" id="calendarSource">予定メモ</span>
         </div>
         <div class="calendar-status-grid">
           <div class="calendar-now">
@@ -44,12 +43,33 @@
           <strong id="nextEventTitle">読み込み中</strong>
           <small id="nextEventCountdown">予定データを確認しています</small>
         </div>
+        <div class="plus-message priority-message" id="homePriority">今日の状態を観測して、次の一手を決めます。</div>
         <div class="free-time-panel">
           <div class="sub-title">予定がない時間帯</div>
           <div class="free-time-list" id="freeTimeList"></div>
         </div>
         <div class="agenda-list" id="calendarEventList"></div>
-        <div class="plus-message" id="homePriority">今日の状態を観測して、次の一手を決めます。</div>
+      </div>
+
+      <div class="card hero-state">
+        <div class="state-line">
+          <div>
+            <div class="state-label">今日の観測状態</div>
+            <div class="state-value" id="stateText">未観測</div>
+          </div>
+          <button class="secondary-btn" data-go="quick">記録する</button>
+        </div>
+        <div class="metric-grid">
+          <div class="metric escape">
+            <span>逃避時間</span>
+            <strong id="homeEscape">0分</strong>
+          </div>
+          <div class="metric build">
+            <span>積み上げ時間</span>
+            <strong id="homeBuild">0分</strong>
+          </div>
+        </div>
+        <button class="warning" id="reviewWarning" data-go="review">30秒だけ今日を確定する。今日を責めずに閉じる。</button>
       </div>
 
       <div class="card hero-state">
@@ -76,27 +96,6 @@
             <strong id="homeMind">未観測</strong>
           </div>
         </div>
-      </div>
-
-      <div class="card hero-state">
-        <div class="state-line">
-          <div>
-            <div class="state-label">今日の観測状態</div>
-            <div class="state-value" id="stateText">未観測</div>
-          </div>
-          <button class="secondary-btn" data-go="quick">記録する</button>
-        </div>
-        <div class="metric-grid">
-          <div class="metric escape">
-            <span>逃避時間</span>
-            <strong id="homeEscape">0分</strong>
-          </div>
-          <div class="metric build">
-            <span>積み上げ時間</span>
-            <strong id="homeBuild">0分</strong>
-          </div>
-        </div>
-        <button class="warning" id="reviewWarning" data-go="review">30秒だけ今日を確定する。今日を責めずに閉じる。</button>
       </div>
 
       <div class="card">
@@ -140,7 +139,7 @@
             <strong id="observeCount">0件</strong>
           </div>
           <div class="observe-item">
-            <span>未観測回避</span>
+            <span>今日の見え方</span>
             <strong id="unobservedAvoided">まだ</strong>
           </div>
           <div class="observe-item">
@@ -255,11 +254,11 @@
           <div class="field">
             <label>種類</label>
             <select id="accountType">
-              <option value="cash">cash</option>
-              <option value="bank">bank</option>
-              <option value="emoney">emoney</option>
-              <option value="credit">credit</option>
-              <option value="other">other</option>
+              <option value="cash">現金</option>
+              <option value="bank">銀行</option>
+              <option value="emoney">電子マネー</option>
+              <option value="credit">クレカ</option>
+              <option value="other">その他</option>
             </select>
           </div>
         </div>
