@@ -60,11 +60,11 @@ function exportJson() {
     exportedAt: new Date().toISOString(),
     records,
     dailyReviews,
-      settings,
-      accounts,
-      moneyRecords,
-      calendarMockEvents: loadArray(STORAGE_KEYS.calendarMockEvents),
-      integrationSettings: loadObject(STORAGE_KEYS.integrationSettings)
+    settings,
+    accounts,
+    moneyRecords,
+    calendarMockEvents: loadArray(STORAGE_KEYS.calendarMockEvents),
+    integrationSettings: loadObject(STORAGE_KEYS.integrationSettings)
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -94,20 +94,20 @@ function importJson() {
       if (!window.confirm("現在のデータをバックアップJSONで置き換えます。続けますか？")) return;
       records = Array.isArray(payload.records) ? payload.records : [];
       dailyReviews = payload.dailyReviews && typeof payload.dailyReviews === "object" ? payload.dailyReviews : {};
-          settings = normalizeSettings(payload.settings || {});
-          accounts = Array.isArray(payload.accounts) ? payload.accounts : [];
-          moneyRecords = Array.isArray(payload.moneyRecords) ? payload.moneyRecords : [];
-          saveArray(STORAGE_KEYS.calendarMockEvents, Array.isArray(payload.calendarMockEvents) ? payload.calendarMockEvents : []);
-          saveObject(STORAGE_KEYS.integrationSettings, payload.integrationSettings || {});
-          ensureDefaultAccount();
+      settings = normalizeSettings(payload.settings || {});
+      accounts = Array.isArray(payload.accounts) ? payload.accounts : [];
+      moneyRecords = Array.isArray(payload.moneyRecords) ? payload.moneyRecords : [];
+      saveArray(STORAGE_KEYS.calendarMockEvents, Array.isArray(payload.calendarMockEvents) ? payload.calendarMockEvents : []);
+      saveObject(STORAGE_KEYS.integrationSettings, payload.integrationSettings || {});
+      ensureDefaultAccount();
       saveArray(STORAGE_KEYS.records, records);
       saveObject(STORAGE_KEYS.dailyReviews, dailyReviews);
       saveObject(STORAGE_KEYS.settings, settings);
-          saveArray(STORAGE_KEYS.accounts, accounts);
-          saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
-          renderAll();
-          loadCalendarAgenda();
-          showToast("JSONを読み込みました");
+      saveArray(STORAGE_KEYS.accounts, accounts);
+      saveArray(STORAGE_KEYS.moneyRecords, moneyRecords);
+      renderAll();
+      loadCalendarAgenda();
+      showToast("JSONを読み込みました");
     } catch {
       showToast("JSONを読み込めませんでした");
     }
@@ -292,9 +292,14 @@ function formatClock(date) {
 
 function formatDurationBetween(from, to) {
   const minutes = Math.max(0, Math.ceil((to - from) / 60000));
+  return formatMinutes(minutes);
+}
+
+function formatMinutes(minutes) {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
   if (hours <= 0) return `${rest}分`;
+  if (rest === 0) return `${hours}時間`;
   return `${hours}時間${rest}分`;
 }
 
