@@ -54,7 +54,7 @@
       calendarMockEvents: "lifeObserver.calendar.mockEvents"
     };
     return {
-      sourceLabel: "Mock Calendar",
+      sourceLabel: "予定メモ",
       async getTodayEvents(date = new Date()) {
         const stored = adapter ? adapter.getArray(keys.calendarMockEvents) : [];
         const events = stored.length ? stored : buildDefaultMockEvents(date);
@@ -67,7 +67,7 @@
     return {
       sourceLabel: "Google Calendar",
       async getTodayEvents() {
-        throw new Error("Google Calendar provider is not configured yet.");
+        throw new Error("Google Calendar連携はまだ準備中です。");
       }
     };
   }
