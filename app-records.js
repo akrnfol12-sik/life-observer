@@ -15,12 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function cacheElements() {
-      [
-        "todayLabel", "observePill", "stateText", "homeNetWorth", "homeLastBalance",
-        "calendarSource", "calendarNow", "calendarCount", "nextEventLabel",
-        "nextEventTitle", "nextEventCountdown", "freeTimeList", "calendarEventList",
-        "homePriority",
-        "homeMonthExpense", "homeBudgetLeft", "homeEscape", "homeBuild", "homeExpense",
+  [
+    "todayLabel", "observePill", "stateText", "homeNetWorth", "homeLastBalance",
+    "calendarSource", "calendarNow", "calendarCount", "nextEventLabel",
+    "nextEventTitle", "nextEventCountdown", "freeTimeList", "calendarEventList",
+    "homePriority",
+    "homeMonthExpense", "homeBudgetLeft", "homeEscape", "homeBuild", "homeExpense",
     "homeMind", "observeCount", "unobservedAvoided", "escapeObserved",
     "todayPlusShort", "todayPlusMessage", "reviewWarning", "todayRecords",
     "categorySections", "quickTitle", "amountField", "amountLabel", "amountChips",
@@ -85,6 +85,8 @@ function showView(name) {
     button.classList.toggle("active", button.dataset.view === name);
   });
   renderAll();
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
 }
 
 function buildCategoryButtons() {
@@ -269,7 +271,7 @@ function saveQuickRecord() {
     createMoneyRecordFromObservation(record, value, selectedReason, selectedQuickMeaning, selectedQuickFuture, els.noteInput.value.trim(), def.moneyType || "expense");
   }
   els.noteInput.value = "";
-  showToast(`${def.label}を保存しました`, "修正", () => openRecordEditor(record.id));
+  showToast(`${def.label}を観測しました`, "修正", () => openRecordEditor(record.id));
 }
 
 function addRecord(category, value, reason, mood, note, extra = {}) {
