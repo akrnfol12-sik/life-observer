@@ -718,7 +718,7 @@ textarea {
 
 .record-list,
 .account-list,
-history-list {
+.history-list {
   display: grid;
   gap: 8px;
 }
