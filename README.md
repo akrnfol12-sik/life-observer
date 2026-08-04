@@ -25,7 +25,8 @@ https://akrnfol12-sik.github.io/life-observer/
 
 - `index.html`: 画面のHTML構造
 - `styles.css`: 既存のスマホ向けUIとホームコックピットのスタイル
-- `app.js`: 画面描画、入力処理、集計ロジック
+- `pages-fixes.css`: GitHub Pages公開時にも安全に効かせる補正スタイル
+- `app.js` / `app-*.js`: 画面描画、入力処理、集計ロジック
 - `storage.js`: LocalStorageアダプターと保存キー定義
 - `calendar.js`: Google Calendar連携を想定した予定取得モジュール
 - `manifest.webmanifest`: スマホでホーム画面追加しやすくするための設定
