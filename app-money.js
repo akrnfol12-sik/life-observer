@@ -242,3 +242,4 @@ function isCreditDebtAccount(id) {
   const account = accounts.find((item) => item.id === id);
   return Boolean(account && account.type === "credit" && account.isDebt);
 }
+
