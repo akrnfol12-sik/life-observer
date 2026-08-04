@@ -22,7 +22,7 @@ function renderAll() {
   els.homeMind.textContent = getMindLabel(summary, review);
 
   els.observeCount.textContent = `${summary.observationCount}件`;
-  els.unobservedAvoided.textContent = observed ? "回避済み" : "未観測";
+  els.unobservedAvoided.textContent = observed ? "見えている" : "未観測";
   els.escapeObserved.textContent = summary.escapeMinutes > 0 ? "逃避も観測済み" : "まだ未観測";
   els.todayPlusShort.textContent = observed ? "見えた" : "1件でOK";
   els.todayPlusMessage.textContent = getPlusMessage(summary, observed);
@@ -83,8 +83,8 @@ function renderCalendarCockpit(summary = getTodaySummary(), moneySummary = getMo
 
   if (calendarStatus === "error") {
     els.nextEventLabel.textContent = "予定取得";
-    els.nextEventTitle.textContent = "未接続";
-    els.nextEventCountdown.textContent = calendarError || "Google Calendar接続前のため、予定は未観測です";
+    els.nextEventTitle.textContent = "予定は未観測";
+    els.nextEventCountdown.textContent = calendarError || "予定連携の準備中です";
   } else if (calendarStatus === "loading") {
     els.nextEventLabel.textContent = "予定取得";
     els.nextEventTitle.textContent = "読み込み中";
@@ -115,7 +115,7 @@ function renderFreeTime(freeWindows) {
     return;
   }
   if (calendarStatus === "error") {
-    renderEmpty(els.freeTimeList, "予定連携が未接続です。今はモック予定に差し替え可能な状態です");
+    renderEmpty(els.freeTimeList, "予定の取得先を確認中です");
     return;
   }
   const visibleWindows = freeWindows.filter((windowItem) => windowItem.minutes >= 15).slice(0, 3);
@@ -126,7 +126,7 @@ function renderFreeTime(freeWindows) {
   visibleWindows.forEach((windowItem) => {
     const item = document.createElement("div");
     item.className = "free-time-item";
-    item.textContent = `${formatClock(windowItem.start)}-${formatClock(windowItem.end)} / ${windowItem.minutes}分`;
+    item.textContent = `${formatClock(windowItem.start)}-${formatClock(windowItem.end)} / ${formatMinutes(windowItem.minutes)}`;
     els.freeTimeList.appendChild(item);
   });
 }
@@ -138,9 +138,12 @@ function renderCalendarEvents(events) {
     renderEmpty(els.calendarEventList, "今日の予定はまだ未観測です");
     return;
   }
+  const now = new Date();
   events.forEach((event) => {
     const item = document.createElement("div");
     item.className = "agenda-item";
+    const status = getEventStatus(event, now);
+    if (status) item.classList.add(status);
     const time = document.createElement("div");
     time.className = "agenda-time";
     time.textContent = formatTimeRange(event);
@@ -156,6 +159,12 @@ function renderCalendarEvents(events) {
     item.append(time, main);
     els.calendarEventList.appendChild(item);
   });
+}
+
+function getEventStatus(event, now) {
+  if (event.startDate <= now && event.endDate > now) return "current";
+  if (event.startDate > now) return "upcoming";
+  return "past";
 }
 
 function getAgendaState(events, now) {
